@@ -1,6 +1,6 @@
 #include "imu.h"
 
-#define OFFSET_SAMPLES 4096 // Samples for static gyro drift offset
+#define OFFSET_SAMPLES 10000 // Samples for static gyro drift offset
 
 IMU::IMU() : z(0.0) {}
 
@@ -10,7 +10,7 @@ void IMU::init() {
   lsm.writeReg(LSM6::CTRL2_G, 0b10001000); // Full scale 1000dps
   // Find Z offset
   int64_t total = 0;
-  for (uint16_t i = 0; i < OFFSET_SAMPLES; i++) {
+  for (uint32_t i = 0; i < OFFSET_SAMPLES; i++) {
     // Wait for new data
     while((!lsm.readReg(LSM6::STATUS_REG)) & 0x08);
     lsm.read();

@@ -21,14 +21,13 @@ typedef enum Direction {
 // List of sequential distance + turn pairs for the robot to make
 // The robot will first go the distance (in cm), followed by making the specified turn, and then proceed to the next pair
 Pair<int, Direction> turns[] = {
-  {50, RIGHT},
-  {50, LEFT},
-  {50, LEFT},
-  {50, RIGHT},
-  {50, BACKWARD},
-  {100, END}, // The sequence must terminate with an END turn
+  {20, RIGHT},
+  {200, LEFT},
+  {150, LEFT},
+  {200, LEFT},
+  {100, LEFT},
+  {150, END}, // The sequence must terminate with an END turn
 };
-#define NUM_TURNS (sizeof(turns) / sizeof(turns[0]))
 #define BASE_SPEED 50 // ~30-300
 
 Romi32U4ButtonA button;
@@ -37,12 +36,12 @@ Romi32U4Encoders encoders;
 IMU imu;
 
 #define COUNTS_PER_REV 1437.09 // See https://pololu.github.io/romi-32u4-arduino-library/class_romi32_u4_encoders.html
-#define WHEEL_CIRCUMFERENCE_M M_PI * 7 // Romi wheels are 70mm in diameter
+#define WHEEL_CIRCUMFERENCE_M M_PI * 7 // Romi wheels are 7cm in diameter
 int64_t totalCountsL = 0, totalCountsR = 0;
 
-#define DRIVE_KP 4
+#define DRIVE_KP 3.5
 #define DRIVE_KI 0
-#define DRIVE_KD 0.35
+#define DRIVE_KD 0.25
 double pidOut, pidSet;
 PID pid(&imu.z, &pidOut, &pidSet, DRIVE_KP, DRIVE_KI, DRIVE_KD, DIRECT);
 
@@ -65,15 +64,11 @@ void setup() {
   Serial.begin(115200);
   Wire.begin();
   // Delay so gyro is calibrated when still
-  delay(500);
+  delay(1000);
   encoders.init();
   imu.init();
   pid.SetOutputLimits(-150, 150); // Half of motor full range
   pid.SetMode(AUTOMATIC);
-  // Turn LED on to indicate that all initialization is complete
-  ledYellow(1);
-  // Wait until button is presed to exit setup and begin routine
-  while (!button.getSingleDebouncedRelease());
   imu.reset();
 }
 
@@ -87,10 +82,6 @@ void loop() {
   motors.setSpeeds(speedL, speedR);
   // Turn if necessary
   if (get_dist_traveled() >= turns[currentTurn].first) {
-    if (currentTurn > NUM_TURNS) {
-      motors.setSpeeds(0, 0);
-      while (true);
-    }
     if (turns[currentTurn].second == LEFT) {
       pidSet += 90;
     } else if (turns[currentTurn].second == RIGHT) {
@@ -100,6 +91,10 @@ void loop() {
         pidSet += 180;
       } else {
         pidSet -= 180;
+      }
+    } else if (turns[currentTurn].second == END) {
+      while (true) {
+        motors.setSpeeds(0, 0);
       }
     }
     reset_dist();
