@@ -41,7 +41,7 @@ int64_t totalCountsL = 0, totalCountsR = 0;
 
 #define DRIVE_KP 3.5
 #define DRIVE_KI 0
-#define DRIVE_KD 0.25
+#define DRIVE_KD 0.3
 double pidOut, pidSet;
 PID pid(&imu.z, &pidOut, &pidSet, DRIVE_KP, DRIVE_KI, DRIVE_KD, DIRECT);
 
@@ -70,6 +70,10 @@ void setup() {
   pid.SetOutputLimits(-150, 150); // Half of motor full range
   pid.SetMode(AUTOMATIC);
   imu.reset();
+  // Turn LED on to indicate that all initialization is complete
+  ledYellow(1);
+  // Wait until button is presed to exit setup and begin routine
+  while (!button.getSingleDebouncedRelease());
 }
 
 void loop() {
@@ -95,6 +99,7 @@ void loop() {
     } else if (turns[currentTurn].second == END) {
       while (true) {
         motors.setSpeeds(0, 0);
+        delay(10);
       }
     }
     reset_dist();
