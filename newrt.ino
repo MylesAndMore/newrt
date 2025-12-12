@@ -75,6 +75,10 @@ void setup() {
   pid.SetOutputLimits(-150, 150); // Half of motor full range
   pid.SetMode(AUTOMATIC);
   Serial.println("ready!");
+  // Turn LED on to indicate that all initialization is complete
+  ledYellow(1);
+  // Wait until button is presed to exit setup and begin routine
+  while (!button.getSingleDebouncedRelease());
 }
 
 void loop() {
@@ -100,6 +104,7 @@ void loop() {
     } else if (turns[currentTurn].second == END) {
       while (true) {
         motors.setSpeeds(0, 0);
+        delay(10);
       }
     }
     reset_dist();
