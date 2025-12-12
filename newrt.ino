@@ -5,9 +5,9 @@
 
 template<typename T1, typename T2>
 struct Pair {
-    T1 first;
-    T2 second;
-    Pair(T1 f, T2 s) : first(f), second(s) {}
+  T1 first;
+  T2 second;
+  Pair(T1 f, T2 s) : first(f), second(s) {}
 };
 
 typedef enum Direction {
@@ -28,7 +28,7 @@ Pair<int, Direction> turns[] = {
   {100, LEFT},
   {150, END}, // The sequence must terminate with an END turn
 };
-#define BASE_SPEED 50 // ~30-300
+#define BASE_SPEED 100 // ~30-300
 
 Romi32U4ButtonA button;
 Romi32U4Motors motors;
@@ -41,7 +41,7 @@ int64_t totalCountsL = 0, totalCountsR = 0;
 
 #define DRIVE_KP 3.5
 #define DRIVE_KI 0
-#define DRIVE_KD 0.25
+#define DRIVE_KD 0.3
 double pidOut, pidSet;
 PID pid(&imu.z, &pidOut, &pidSet, DRIVE_KP, DRIVE_KI, DRIVE_KD, DIRECT);
 
@@ -62,14 +62,19 @@ void reset_dist() {
 
 void setup() {
   Serial.begin(115200);
+  delay(2000);
   Wire.begin();
-  // Delay so gyro is calibrated when still
-  delay(1000);
+  Serial.println("encoder init");
   encoders.init();
-  imu.init();
+  Serial.println("imu init");
+  if (!imu.init()) {
+    // Initialization failed, halt program
+    Serial.println("imu init failed!");
+    while (true) { delay(10); }
+  }
   pid.SetOutputLimits(-150, 150); // Half of motor full range
   pid.SetMode(AUTOMATIC);
-  imu.reset();
+  Serial.println("ready!");
 }
 
 void loop() {

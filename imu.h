@@ -1,18 +1,16 @@
 #pragma once
 
-#include <LSM6.h>
+#include <SparkFun_BNO080_Arduino_Library.h>
 
 class IMU {
   public:
     double z;
 
     IMU();
-    void init();
+    bool init();
     void reset();
     void update();
 
   private:
-    LSM6 lsm;
-    int16_t offsetZ; 
-    unsigned long lastUpdate;
+    BNO080 bno;
 };
