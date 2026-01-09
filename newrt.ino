@@ -30,7 +30,6 @@ Pair<int, Direction> turns[] = {
 };
 #define BASE_SPEED 100 // ~30-300
 
-Romi32U4ButtonA button;
 Romi32U4Motors motors;
 Romi32U4Encoders encoders;
 IMU imu;
@@ -75,10 +74,6 @@ void setup() {
   pid.SetOutputLimits(-150, 150); // Half of motor full range
   pid.SetMode(AUTOMATIC);
   Serial.println("ready!");
-  // Turn LED on to indicate that all initialization is complete
-  ledYellow(1);
-  // Wait until button is presed to exit setup and begin routine
-  while (!button.getSingleDebouncedRelease());
 }
 
 void loop() {

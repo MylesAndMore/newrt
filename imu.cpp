@@ -1,3 +1,5 @@
+// SENSOR CALIBRATION PROCEDURE: https://docs.sparkfun.com/SparkFun_VR_IMU_Breakout_BNO086_QWIIC/assets/component_documentation/BNO080-BNO085-Sesnor-Calibration-Procedure.pdf
+
 #include <Wire.h>
 
 #include "imu.h"
@@ -7,6 +9,8 @@
 IMU::IMU() : z(0.0) {}
 
 bool IMU::init() {
+  bno.enableDebugging();
+  Wire.flush();
   if (!bno.begin(IMU_ADDR)) {
     return false;
   }
@@ -14,7 +18,12 @@ bool IMU::init() {
   Wire.setClock(400000);
   bno.enableRotationVector(50); // Send data every 50ms
   // Wait until we have a stable data stream to reset
-  while (!bno.dataAvailable()) { delay(5); }
+  Serial.print("waiting for data");
+  while (!bno.dataAvailable()) {
+    Serial.print(".");
+    delay(500); 
+  }
+  Serial.println();
   reset();
   return true;
 }
